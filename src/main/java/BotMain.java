@@ -50,7 +50,7 @@ public class BotMain {
             clickOnButton(robot, pointSearch);
 
             Thread.sleep(5000);
-            BufferedImage buttonLike = ImageIO.read(BotMain.class.getResourceAsStream("/Capturar.JPG"));
+            BufferedImage buttonLike = ImageIO.read(BotMain.class.getResourceAsStream("/curtir.JPG"));
             Point pointLike = findButton(robot, buttonLike);
             clickOnButton(robot, pointLike);
 
