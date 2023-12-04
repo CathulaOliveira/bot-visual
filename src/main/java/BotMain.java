@@ -27,13 +27,12 @@ public class BotMain {
             }
 
             Robot robot = new Robot();
-
             // Aguarda alguns segundos para abrir o navegador
             Thread.sleep(6000);
 
-            robot.mouseMove(500, 100);
-            robot.mousePress(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);
-            robot.mouseRelease(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);
+            BufferedImage buttonSearch = ImageIO.read(BotMain.class.getResourceAsStream("/pesquisar.JPG"));
+            Point pointSearch = findButton(robot, buttonSearch);
+            clickOnButton(robot, pointSearch);
             Thread.sleep(6000);
 
             // Digita algo na barra de pesquisa (simulando o teclado)
@@ -47,32 +46,20 @@ public class BotMain {
             Thread.sleep(6000);
 
             // Clicar um pouco a baixo da pesquisa onde deve estar o primeiro video carregado
-            robot.mouseMove(500, 250);
-            robot.mousePress(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);
-            robot.mouseRelease(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);
+            pointSearch.y = pointSearch.y + 250;
+            clickOnButton(robot, pointSearch);
 
             Thread.sleep(5000);
-            // Chamada para identificar e clicar no botão de curtir
-            clickOnButton(robot);
+            BufferedImage buttonLike = ImageIO.read(BotMain.class.getResourceAsStream("/Capturar.JPG"));
+            Point pointLike = findButton(robot, buttonLike);
+            clickOnButton(robot, pointLike);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Método para identificar e clicar no botão desejado
-    public static void clickOnButton(Robot robot) throws Exception {
-
-        // Carregue a imagem do botão que deseja encontrar
-        BufferedImage buttonImage = ImageIO.read(BotMain.class.getResourceAsStream("/Capturar.JPG"));
-        // Capture a tela atual
-        Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
-        BufferedImage screenImage = robot.createScreenCapture(screenRect);
-
-        // Template Matching
-        Point point = findButton(screenImage, buttonImage);
-
-        // Se o botão for encontrado
+    public static void clickOnButton(Robot robot, Point point) throws Exception {
         if (point != null && point.x != -1 && point.y != -1) {
             // Mova o mouse para as coordenadas do botão
             robot.mouseMove(point.x, point.y);
@@ -100,7 +87,11 @@ public class BotMain {
         }
     }
 
-    public static Point findButton(BufferedImage screenCapture, BufferedImage buttonImage) {
+    public static Point findButton(Robot robot, BufferedImage buttonImage) {
+        // Capture a tela atual
+        Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        BufferedImage screenCapture = robot.createScreenCapture(screenRect);
+
         double threshold = 0.1; // Threshold de similaridade
         int screenWidth = screenCapture.getWidth();
         int screenHeight = screenCapture.getHeight();
