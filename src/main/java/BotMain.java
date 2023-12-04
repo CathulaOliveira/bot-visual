@@ -29,12 +29,12 @@ public class BotMain {
             Robot robot = new Robot();
 
             // Aguarda alguns segundos para abrir o navegador
-            Thread.sleep(5000);
+            Thread.sleep(6000);
 
             robot.mouseMove(500, 100);
             robot.mousePress(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);
             robot.mouseRelease(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);
-            Thread.sleep(5000);
+            Thread.sleep(6000);
 
             // Digita algo na barra de pesquisa (simulando o teclado)
             type(robot, "java 17");
@@ -71,13 +71,11 @@ public class BotMain {
 
         // Template Matching
         Point point = findButton(screenImage, buttonImage);
-        int buttonX = point.x;
-        int buttonY = point.y;
 
         // Se o botão for encontrado
-        if (buttonX != -1 && buttonY != -1) {
+        if (point != null && point.x != -1 && point.y != -1) {
             // Mova o mouse para as coordenadas do botão
-            robot.mouseMove(buttonX, buttonY);
+            robot.mouseMove(point.x, point.y);
 
             // Clique no botão
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
@@ -112,19 +110,32 @@ public class BotMain {
         double bestMatch = Double.MAX_VALUE;
         Point bestMatchPoint = null;
 
+        // Converte as imagens para arrays de pixels uma vez para evitar acessos repetidos
+        int[] screenPixels = screenCapture.getRGB(0, 0, screenWidth, screenHeight, null, 0, screenWidth);
+        int[] buttonPixels = buttonImage.getRGB(0, 0, buttonWidth, buttonHeight, null, 0, buttonWidth);
+
         for (int y = 0; y < screenHeight - buttonHeight; y++) {
             for (int x = 0; x < screenWidth - buttonWidth; x++) {
                 double totalDiff = 0;
 
                 for (int i = 0; i < buttonWidth; i++) {
                     for (int j = 0; j < buttonHeight; j++) {
-                        Color screenColor = new Color(screenCapture.getRGB(x + i, y + j));
-                        Color buttonColor = new Color(buttonImage.getRGB(i, j));
+                        int screenPixel = screenPixels[(y + j) * screenWidth + (x + i)];
+                        int buttonPixel = buttonPixels[j * buttonWidth + i];
+
+                        // Extrai os componentes RGB diretamente do valor do pixel
+                        int screenRed = (screenPixel >> 16) & 0xFF;
+                        int screenGreen = (screenPixel >> 8) & 0xFF;
+                        int screenBlue = screenPixel & 0xFF;
+
+                        int buttonRed = (buttonPixel >> 16) & 0xFF;
+                        int buttonGreen = (buttonPixel >> 8) & 0xFF;
+                        int buttonBlue = buttonPixel & 0xFF;
 
                         // Calcula a diferença entre as cores RGB
-                        double diffRed = Math.abs(screenColor.getRed() - buttonColor.getRed()) / 255.0;
-                        double diffGreen = Math.abs(screenColor.getGreen() - buttonColor.getGreen()) / 255.0;
-                        double diffBlue = Math.abs(screenColor.getBlue() - buttonColor.getBlue()) / 255.0;
+                        double diffRed = Math.abs(screenRed - buttonRed) / 255.0;
+                        double diffGreen = Math.abs(screenGreen - buttonGreen) / 255.0;
+                        double diffBlue = Math.abs(screenBlue - buttonBlue) / 255.0;
 
                         // Calcula a diferença total média entre as cores
                         double pixelDiff = (diffRed + diffGreen + diffBlue) / 3.0;
